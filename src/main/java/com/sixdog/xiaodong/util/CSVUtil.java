@@ -1,6 +1,8 @@
 package com.sixdog.xiaodong.util;
 
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -14,44 +16,38 @@ public class CSVUtil {
 	public static char separator = ',';
 	public static String filePath = "src/main/resources/sayInfo.csv";
     public static void main(String[] args) throws Exception {
-        // 测试导出
-        String filePath = "src/main/resources/sayInfo.csv";
         //添加标题
-        String[] dataList = new String[]{"No.", "标题", "内容"};
-//        for (int i = 0; i < 10; i++) {
-//            dataList.add(new String[]{"2010000" + i, "张三" + i, "8" + i});
-//        }
+        List<String[]> dataList = new ArrayList<String[]>();
+        for (int i = 0; i < 10; i++) {
+        	dataList.add(new String[]{"100" + i, "张三" + i, "8" + i});
+        }
         createCSV(dataList);
 
         // 读取CSV文件
-        readCSV(filePath);
+        //readCSV();
     }
 
     /**
      * 读取CSV文件
-     * @param filePath:全路径名
      */
-    public static List<String[]> readCSV(String filePath) throws Exception {
+    public static List<String[]> readCSV() throws Exception {
         CsvReader reader = null;
         List<String[]> dataList = new ArrayList<String[]>();
         try {
-            //如果生产文件乱码，windows下用gbk，linux用UTF-8
-            reader = new CsvReader(filePath, separator, Charset.forName("UTF-8"));
-
-            // 读取表头
-            reader.readHeaders();
-            String[] headArray = reader.getHeaders();//获取标题
-            System.out.println(headArray[0] + headArray[1] + headArray[2]);
-
-            // 逐条读取记录，直至读完
-            while (reader.readRecord()) {
-                // 读一整行
-                System.out.println(reader.getRawRecord());
-                // 读这行的第一列
-                System.out.println(reader.get("学号"));
-                // 读这行的第二列
-                System.out.println(reader.get(1));
-            }
+        	File file=new File(filePath);
+        	if(file.exists()) {
+        		//如果生产文件乱码，windows下用gbk，linux用UTF-8
+        		reader = new CsvReader(filePath, separator, Charset.forName("UTF-8"));
+        		// 逐条读取记录，直至读完
+        		while (reader.readRecord()) {
+        			String[] sayInfo = new String[3];
+        			System.out.println(reader.get(0));
+        			sayInfo[0] = reader.get(0);
+        			sayInfo[1] = reader.get(1);
+        			sayInfo[2] = reader.get(2);
+        			dataList.add(sayInfo);
+        		}
+        	}
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -65,10 +61,9 @@ public class CSVUtil {
 
     /**
      * 生成CSV文件
-     * @param dataList:数据集
-     * @param filePath:全路径名
+     * @param sayInfoList:数据集
      */
-    public static boolean createCSV(String[] data) throws Exception {
+    public static boolean createCSV(List<String[]> dataList) throws Exception {
         boolean isSuccess = false;
         CsvWriter writer = null;
         FileOutputStream out = null;
@@ -76,7 +71,9 @@ public class CSVUtil {
             out = new FileOutputStream(filePath, true);
             //如果生产文件乱码，windows下用gbk，linux用UTF-8
             writer = new CsvWriter(out, separator, Charset.forName("UTF-8"));
-            writer.writeRecord(data);
+            for(String[] item : dataList) {
+            	writer.writeRecord(item);
+            }
             isSuccess = true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -94,5 +91,31 @@ public class CSVUtil {
         }
 
         return isSuccess;
+    }
+    
+    /**
+     * 生成CSV文件
+     * 将排完序后的数据再写入文件 
+     * @param sayInfoList:数据集
+     */
+    public static boolean createCsv(List<String[]> dataList) {
+    	boolean isSuccess = false;
+    	//尝试使用try-with-resource语法
+    	try(FileWriter fw = new FileWriter(filePath)){
+    		dataList.forEach(item->{
+				try {
+					fw.write(item[0]+","+item[1]+","+item[2]+"\n");
+					fw.flush();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			});
+    		isSuccess = true;
+    	} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		return isSuccess;
     }
 }

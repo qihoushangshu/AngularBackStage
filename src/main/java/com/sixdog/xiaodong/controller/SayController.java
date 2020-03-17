@@ -1,7 +1,5 @@
 package com.sixdog.xiaodong.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -10,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.sixdog.xiaodong.dto.SayInfo;
 import com.sixdog.xiaodong.util.CSVUtil;
 
-import java.util.UUID;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,18 +22,28 @@ public class SayController {
 
 	@RequestMapping(path = "/saveSay",method = RequestMethod.POST)
 	public String saveSayWords(@RequestBody SayInfo say) {
-		logger.info("--------------------------start");
-	    logger.info(say.getTitle());
-	    logger.info(say.getContent());
-	    String uuid = UUID.randomUUID().toString();
+		boolean isSuccess = false;
 	    try {
-			CSVUtil.createCSV(new String[] {uuid,say.getTitle(),say.getContent()});
+	    	List<String[]> sayInfoList = CSVUtil.readCSV();
+	    	int length = sayInfoList.size();
+	    	if (0!=length) {
+	    		sayInfoList.sort((String[] o1,String[] o2)->Integer.parseInt(o1[0])-Integer.parseInt(o2[0]));
+	    		logger.info("-----------------------------");
+	    		sayInfoList.forEach(item->logger.info(item[0]));
+	    		
+	    		int lastId = Integer.parseInt(sayInfoList.get(length-1)[0])+1;
+	    		String sayInfo[] = {String.valueOf(lastId),say.getTitle(),say.getContent()};
+	    		sayInfoList.add(sayInfo);
+	    	}else {
+	    		String sayInfo[] = {String.valueOf(1),say.getTitle(),say.getContent()};
+	    		sayInfoList.add(sayInfo);
+	    	}
+			isSuccess = CSVUtil.createCsv(sayInfoList);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			logger.info(e.getMessage());
 		}
-	    logger.info("--------------------------end");
-	    return "{\"ret\":\"success\"}";
+	    return "{\"ret\":"+isSuccess+"}";
 	}
 	
 	@RequestMapping(path = "/test")
