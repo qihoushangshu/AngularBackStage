@@ -29,7 +29,7 @@ public class SayController {
 	    	if (0!=length) {
 	    		sayInfoList.sort((String[] o1,String[] o2)->Integer.parseInt(o1[0])-Integer.parseInt(o2[0]));
 	    		logger.info("-----------------------------");
-	    		sayInfoList.forEach(item->logger.info(item[0]));
+	    		//sayInfoList.forEach(item->logger.info(item[0]));
 	    		
 	    		int lastId = Integer.parseInt(sayInfoList.get(length-1)[0])+1;
 	    		String sayInfo[] = {String.valueOf(lastId),say.getTitle(),say.getContent()};

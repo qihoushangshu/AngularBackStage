@@ -41,7 +41,7 @@ public class CSVUtil {
         		// 逐条读取记录，直至读完
         		while (reader.readRecord()) {
         			String[] sayInfo = new String[3];
-        			System.out.println(reader.get(0));
+        			//System.out.println(reader.get(0));
         			sayInfo[0] = reader.get(0);
         			sayInfo[1] = reader.get(1);
         			sayInfo[2] = reader.get(2);
